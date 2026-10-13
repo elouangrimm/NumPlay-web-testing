@@ -69,6 +69,29 @@ Hit enemies with the nail to fill your soul, then hold the spell key to focus it
 
 In menus, OK or EXE confirms and Back goes back. In the inventory, left and right at the edges change pages. On the map page, OK places markers once you have them, and Shift shows or hides the key and the pins.
 
+## Web build (initial target)
+
+An experimental WebAssembly target is available for browser testing.
+
+```bash
+make data HOLLOWKNIGHT="$HOME/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data"
+make web
+```
+
+This writes `build/web/hollowknight.html` (plus `.js`, `.wasm` and data files). Open it with a static web server.
+
+Keyboard mapping:
+
+* Arrows: move / look
+* Space: jump + menu confirm
+* X: attack + menu back
+* Shift: dash
+* Z or C: focus / spell
+* I: inventory
+* Tab: map
+* Backspace: pause
+* Escape: quit
+
 ## Good to know
 
 * **One app at a time:** Hollow Knight takes all the room the calculator has for apps. Installing it from the NumWorks website swaps out NumPlay and the other apps, and installing NumPlay again swaps it back out. Your saves in each one are kept.
