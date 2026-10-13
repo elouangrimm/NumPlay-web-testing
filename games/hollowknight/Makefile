@@ -2,10 +2,12 @@
 #   make            output/hollowknight.nwa
 #   make check      link it like the calculator does (output/hollowknight.bin)
 #   make host       build/play: the game on a computer, for tests and screenshots
+#   make web        build/web/hollowknight.html (WebAssembly, for browsers)
 #   make test       checks of the host build (tests/check.py)
 #   make data       regenerate src/data.bin from the game (HOLLOWKNIGHT=<its Data folder>)
 Q ?= @
 CC = arm-none-eabi-gcc
+EMCC ?= emcc
 NWLINK ?= npx --yes -- nwlink@1.0.0
 STRIP ?= arm-none-eabi-strip --strip-unneeded
 BUILD_DIR = output
@@ -21,7 +23,7 @@ LDFLAGS = -Wl,--relocatable -nostartfiles --specs=nano.specs
 LDFLAGS += -Wl,-e,main -Wl,-u,eadk_app_name -Wl,-u,eadk_app_icon -Wl,-u,eadk_api_level
 LDFLAGS += -Wl,--gc-sections -flinker-output=nolto-rel
 
-.PHONY: build check clean host data test
+.PHONY: build check clean host web data test
 build: $(BUILD_DIR)/hollowknight.nwa
 
 # the RAM the calculator gives apps (data + bss) depends on its software: 153676 bytes on 25.2, 149500 on 24.10,
@@ -53,6 +55,16 @@ $(HOST_OUT): $(GAME) src/plat_host.c tests/play.c $(HEADERS)
 	$(Q) mkdir -p $(dir $@) build/host-saves
 	$(Q) cc $(HOST_FLAGS) -fsanitize=address,undefined $(GAME) src/plat_host.c tests/play.c -lm -o $@
 	@echo "HOST    $@"
+
+WEB_FLAGS = -std=gnu11 -O2 -Wall -Wextra -Wno-unused-parameter -Isrc -DHOST
+WEB_OUT ?= build/web/hollowknight.html
+web: $(WEB_OUT)
+$(WEB_OUT): $(GAME) src/plat_web.c tests/web.c $(HEADERS) src/data.bin
+	$(Q) mkdir -p $(dir $@)
+	$(Q) $(EMCC) $(WEB_FLAGS) $(GAME) src/plat_web.c tests/web.c -lm -lidbfs.js \
+	  -sALLOW_MEMORY_GROWTH=1 -sFORCE_FILESYSTEM=1 \
+	  --preload-file src/data.bin@/data.bin -o $@
+	@echo "WEB     $@"
 
 test: $(HOST_OUT)
 	python3 tests/check.py $(HOST_OUT) src/data.bin

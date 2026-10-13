@@ -1,6 +1,6 @@
 """Reading the game's Unity files: scenes (GameObjects with world transforms and components), sprites, textures,
 and MonoBehaviour fields through type trees made from the game's own assemblies.
-The game's Data folder comes from HOLLOWKNIGHT (default: the owner's copy)."""
+The game's Data folder comes from HOLLOWKNIGHT (default: common local install paths)."""
 import os, sys, json, math, functools
 import numpy as np
 
@@ -9,7 +9,23 @@ sys.path.insert(0, HERE)
 import UnityPy
 import typetree, fsm as fsmdec
 
-DATA = os.environ.get("HOLLOWKNIGHT", "/root/numplay-work/gamesrc/hk/Hollow Knight/hollow_knight.app/Contents/Resources/Data")
+def find_data_dir():
+    env = os.environ.get("HOLLOWKNIGHT")
+    if env:
+        return os.path.expanduser(env)
+    for p in (
+        "~/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data",
+        "~/.steam/steam/steamapps/common/Hollow Knight/hollow_knight_Data",
+        "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data",
+        "/root/numplay-work/gamesrc/hk/Hollow Knight/hollow_knight.app/Contents/Resources/Data",
+    ):
+        p = os.path.expanduser(p)
+        if os.path.isdir(p):
+            return p
+    return os.path.expanduser("~/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data")
+
+
+DATA = find_data_dir()
 CACHE = os.path.join(HERE, "cache")
 typetree.MANAGED = os.path.join(DATA, "Managed")
 S = fsmdec.S
