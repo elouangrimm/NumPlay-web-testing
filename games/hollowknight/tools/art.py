@@ -15,7 +15,13 @@ BLUR_SIGMA = 1.2        # background blur, calculator pixels (LightBlurredBackgr
 BLUR_SCALE = float(os.environ.get("HK_BLUR_SCALE", "0.2"))   # texels a screen pixel behind the blur plane
 FG_SCALE = float(os.environ.get("HK_FG_SCALE", "0.5"))       # ... in front of the gameplay plane (z < FG_Z)
 FG_Z = -2.5
-FIT_K = float(os.environ.get("HK_FIT_K", "0.77"))   # (all the rooms' scenery a little less fine, to fit the flash)
+HK_WEB_QUALITY = os.environ.get("HK_WEB_QUALITY", "0") == "1"
+if HK_WEB_QUALITY:
+    FIT_K = float(os.environ.get("HK_FIT_K", "1.0"))
+    FG_SCALE = float(os.environ.get("HK_FG_SCALE", "1.0"))
+    BLUR_SCALE = float(os.environ.get("HK_BLUR_SCALE", "0.5"))
+else:
+    FIT_K = float(os.environ.get("HK_FIT_K", "0.77"))   # (all the rooms' scenery a little less fine, to fit the flash)
 BLUR_PRE = False   # (the game blurs the background as a whole: the calculator does too)
 LZMA_FILTERS = [{"id": lzma.FILTER_LZMA1, "lc": 0, "lp": 0, "pb": 0, "dict_size": 1 << 12, "preset": 9 | lzma.PRESET_EXTREME}]
 
@@ -170,6 +176,8 @@ FIT = {}   # room -> texture scale factor (fit.py: so that every view's tiles fi
 def build_variants(rooms, vis_of, owned=lambda r: ()):
     """Assign every instance a texture variant. vis_of(room) -> (weights, cells); owned(room) -> the (scene, object id)
     drawn by others (left out)."""
+    if HK_WEB_QUALITY:
+        FIT.clear()
     variants = {}
     per_room = {}
     for r in rooms:

@@ -59,10 +59,11 @@ $(HOST_OUT): $(GAME) src/plat_host.c tests/play.c $(HEADERS)
 WEB_FLAGS = -std=gnu11 -O2 -Wall -Wextra -Wno-unused-parameter -Isrc -DHOST
 WEB_OUT ?= build/web/hollowknight.html
 web: $(WEB_OUT)
-$(WEB_OUT): $(GAME) src/plat_web.c tests/web.c $(HEADERS) src/data.bin
+$(WEB_OUT): $(GAME) src/plat_web.c tests/web.c $(HEADERS) src/data.bin shell.html
 	$(Q) mkdir -p $(dir $@)
 	$(Q) $(EMCC) $(WEB_FLAGS) $(GAME) src/plat_web.c tests/web.c -lm -lidbfs.js \
 	  -sALLOW_MEMORY_GROWTH=1 -sFORCE_FILESYSTEM=1 \
+	  --shell-file shell.html \
 	  --preload-file src/data.bin@/data.bin -o $@
 	@echo "WEB     $@"
 
@@ -70,7 +71,7 @@ test: $(HOST_OUT)
 	python3 tests/check.py $(HOST_OUT) src/data.bin
 
 data:
-	cd tools && python3 pack.py
+	cd tools && HK_WEB_QUALITY=1 python3 pack.py
 
 clean:
 	$(Q) rm -rf $(BUILD_DIR) build

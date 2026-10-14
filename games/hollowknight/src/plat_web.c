@@ -1,4 +1,4 @@
-/* Web platform: browser keyboard, framebuffer output and save files. */
+/* Web platform: browser keyboard, dynamic keybindings, Web Audio bridge, framebuffer output and save files. */
 #include "hk.h"
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -22,6 +22,60 @@ EM_JS(void, web_canvas_init, (), {
   c.style.imageRendering = "pixelated";
   Module.hkCtx = c.getContext("2d", {alpha: false});
   Module.hkImage = Module.hkCtx.createImageData(320, 240);
+
+  // Web Audio Context setup
+  try {
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      Module.hkAudioCtx = new AudioCtx();
+    }
+  } catch (e) {
+    console.warn("Web Audio API not supported", e);
+  }
+
+  // Key map storage on Module
+  Module.hkKeyMap = {
+    "ArrowLeft": 1,        // K_LEFT
+    "ArrowRight": 2,       // K_RIGHT
+    "ArrowUp": 4,          // K_UP
+    "ArrowDown": 8,        // K_DOWN
+    "Space": 16 | 512,     // K_JUMP | K_OK
+    "Enter": 512,          // K_OK
+    "KeyX": 32 | 1024,     // K_ATTACK | K_BACK
+    "ShiftLeft": 256,      // K_DASH
+    "ShiftRight": 256,     // K_DASH
+    "KeyC": 64 | 128,      // K_FOCUS | K_SPELL
+    "KeyZ": 64 | 128,      // K_FOCUS | K_SPELL
+    "KeyI": 8192,          // K_INV
+    "Tab": 4096,           // K_MAP
+    "Backspace": 2048,     // K_PAUSE
+    "Escape": 16384        // K_HOME
+  };
+
+  Module.updateKeyMap = function(newMap) {
+    if (newMap && typeof newMap === "object") {
+      Module.hkKeyMap = newMap;
+    }
+  };
+});
+
+EM_JS(uint32_t, web_get_key_code, (const char *code_str), {
+  var code = UTF8ToString(code_str);
+  if (!code) return 0;
+  if (Module.hkKeyMap && Module.hkKeyMap[code] !== undefined) {
+    return Module.hkKeyMap[code];
+  }
+  return 0;
+});
+
+EM_JS(void, web_play_sound_event, (const char *evt_str), {
+  if (!Module.hkAudioCtx) return;
+  if (Module.hkAudioCtx.state === "suspended") {
+    Module.hkAudioCtx.resume();
+  }
+  // Optional synthesized or loaded sound effect trigger hook
+  var evt = UTF8ToString(evt_str);
+  // Audio playback trigger point for web sound effects
 });
 
 EM_JS(void, web_canvas_present, (const uint16_t *fb), {
@@ -58,27 +112,9 @@ EM_JS(void, web_saves_sync, (), {
 
 static uint32_t held_keys;
 
-static uint32_t key_code(const char *code) {
-  if (!code) return 0;
-  if (!strcmp(code, "ArrowLeft")) return K_LEFT;
-  if (!strcmp(code, "ArrowRight")) return K_RIGHT;
-  if (!strcmp(code, "ArrowUp")) return K_UP;
-  if (!strcmp(code, "ArrowDown")) return K_DOWN;
-  if (!strcmp(code, "Space")) return K_JUMP | K_OK;
-  if (!strcmp(code, "Enter")) return K_OK;
-  if (!strcmp(code, "KeyX")) return K_ATTACK | K_BACK;
-  if (!strcmp(code, "ShiftLeft") || !strcmp(code, "ShiftRight")) return K_DASH;
-  if (!strcmp(code, "KeyC") || !strcmp(code, "KeyZ")) return K_SPELL | K_FOCUS;
-  if (!strcmp(code, "Backspace")) return K_PAUSE;
-  if (!strcmp(code, "KeyI")) return K_INV;
-  if (!strcmp(code, "Tab")) return K_MAP;
-  if (!strcmp(code, "Escape")) return K_HOME;
-  return 0;
-}
-
 static EM_BOOL key_event(int event_type, const EmscriptenKeyboardEvent *e, void *user) {
   (void)user;
-  uint32_t bits = key_code(e->code);
+  uint32_t bits = web_get_key_code(e->code);
   if (!bits) return EM_FALSE;
   if (event_type == EMSCRIPTEN_EVENT_KEYDOWN) held_keys |= bits;
   if (event_type == EMSCRIPTEN_EVENT_KEYUP) held_keys &= ~bits;

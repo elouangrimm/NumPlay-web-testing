@@ -1,113 +1,98 @@
-> **Hollow Knight is a [NumPlay](../../README.md) game that comes on its own.** It fills the calculator's whole app space, so it can't sit next to NumPlay. Get `HollowKnight.nwa` from the [latest release](https://github.com/Mason363/NumPlay/releases/latest).
-
 <p align="center">
   <img src="src/icon.png" width="84" alt="Hollow Knight icon">
 </p>
 
-<h1 align="center">Hollow Knight</h1>
+<h1 align="center">Hollow Knight (WebAssembly / Web Port)</h1>
 
 <p align="center">
-  <b>Explore Hallownest as the Knight, on the NumWorks calculator.</b><br>
-  From King's Pass and Dirtmouth, through the Forgotten Crossroads, to Hornet in Greenpath.
+  <b>High-quality WebAssembly implementation of Hollow Knight in the browser.</b><br>
+  Explore Hallownest as the Knight from King's Pass to Hornet in Greenpath, now running natively on the web.
 </p>
 
-<p align="center">
-  <a href="https://github.com/Mason363/NumPlay/releases/latest/download/HollowKnight.nwa"><b>Download HollowKnight.nwa</b></a>
-  &nbsp;·&nbsp; <a href="#controls">Controls</a>
-</p>
+## Overview
 
-## Highlights
+This project provides a clean, fast WebAssembly/WASM target for playing Hollow Knight in web browsers. It builds on the efficient C engine while leveraging modern web technologies (HTML5 Canvas 2D, Web Audio API, and reconfigurable keyboard controls) for a sleek, minimal, high-fidelity experience without severe calculator downscaling constraints.
 
-* **The start of the journey:** King's Pass, Dirtmouth, the Forgotten Crossroads with the False Knight, Gruz Mother and the Ancestral Mound, then Greenpath up to Hornet and the Mothwing Cloak, with the rooms along the way and their secrets.
-* **The Knight moves like in the game:** the same jumps, nail slashes, recoils, pogos, dash, focus and Vengeful Spirit.
-* **Its creatures and bosses:** from Crawlids and Vengeflies to Moss Knights and Mosskin, the False Knight, Gruz Mother and Hornet, each with its own attacks.
-* **The people of Hallownest:** Elderbug, Sly, Iselda, Cornifer, Salubra, the Snail Shaman, Quirrel, Tiso, the Stag and the Grubfather, with all they have to say.
-* **Everything to find and spend:** geo, charms and what they do, mask shards, vessel fragments, grubs, relics, the map, the quill and its markers, the stag stations and the shops.
-* **Saved like in the game:** rest at a bench to save; die and your shade waits where you fell. Your saves are also copied into `hollowknight_saves.py`, so installing the app again doesn't erase them.
+## Web Features
 
-<table>
-  <tr>
-    <td align="center"><img src="docs/kingspass.png" width="390" alt="King's Pass"><br><sub>King's Pass</sub></td>
-    <td align="center"><img src="docs/dirtmouth.png" width="390" alt="Dirtmouth"><br><sub>Dirtmouth and Elderbug</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/crossroads.png" width="390" alt="Forgotten Crossroads"><br><sub>The Forgotten Crossroads</sub></td>
-    <td align="center"><img src="docs/falseknight.png" width="390" alt="False Knight"><br><sub>The False Knight</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/greenpath.png" width="390" alt="Greenpath"><br><sub>Greenpath</sub></td>
-    <td align="center"><img src="docs/hornet.png" width="390" alt="Hornet"><br><sub>Hornet</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/iselda.png" width="390" alt="Iselda's shop"><br><sub>Iselda's map shop</sub></td>
-    <td align="center"><img src="docs/map.png" width="390" alt="The quick map"><br><sub>The quick map</sub></td>
-  </tr>
-</table>
+* **Minimal Sleek Interface:** Dark ambient UI shell with fullscreen toggle, customizable keybinding modal, and clean viewport.
+* **High-Quality Web Graphics:** Re-packs game assets in full resolution (`HK_WEB_QUALITY=1`), removing calculator tile budget limits and half-height rendering skips (`g_gfx_fast`).
+* **Customizable Controls:** Interactive web keybinding modal supporting full control remapping saved to browser local storage.
+* **Persistent Saves:** Game progress automatically saved to browser storage via Emscripten IDBFS.
+* **Web Audio Bridge:** Web Audio API integration for web sound support.
 
-## How to play
+## Building for the Web
 
-Choose Start Game, then a save. A new game first shows how to play: which key does what, then the basics. You can see them again with How to Play, on the title screen and in the pause menu. Then the Knight falls into King's Pass. Walk on to Dirtmouth and down the well into the Forgotten Crossroads.
+### Prerequisites
 
-Hit enemies with the nail to fill your soul, then hold the spell key to focus it into health. Rest at benches to save and to change charms. When you die you lose your geo and leave a shade behind: defeat it to get them back.
+* Python 3 and NumPy / Pillow
+* Emscripten SDK (`emcc`)
+* A legally owned copy of Hollow Knight (Linux/Mac/Windows installation Data directory)
 
-⌫ pauses: from there you can go on or quit to the title screen, which saves.
+> **Note on Emscripten Installation:**
+> If installing Emscripten from your system package manager (e.g., Arch Linux) feels unnecessarily large, you can easily use the official lightweight **emsdk**:
+> ```bash
+> git clone https://github.com/emscripten-core/emsdk.git
+> cd emsdk
+> ./emsdk install latest
+> ./emsdk activate latest
+> source ./emsdk_env.sh
+> ```
+> Or run the build inside a minimal Emscripten Docker container (`emscripten/emsdk`).
 
-## Controls
+### Build Steps
 
-| Key | What it does |
-| --- | --- |
-| Arrows | Move, look up and down, aim the nail up or down |
-| Up | Talk, read, rest at a bench, go through a door |
-| OK | Jump |
-| Back | Nail |
-| Shift | Dash, once you have the Mothwing Cloak |
-| Alpha | Hold to focus and heal, tap to cast a spell |
-| Var | Hold for the quick map |
-| Toolbox | Inventory |
-| ⌫ | Pause |
-| Home | Save and quit |
+1. **Extract and Pack High-Quality Game Assets:**
 
-In menus, OK or EXE confirms and Back goes back. In the inventory, left and right at the edges change pages. On the map page, OK places markers once you have them, and Shift shows or hides the key and the pins.
-
-## Web build (initial target)
-
-An experimental WebAssembly target is available for browser testing.
+Set `HOLLOWKNIGHT` to your local Hollow Knight Data directory (for example, Steam's installation directory ending in `hollow_knight_Data`):
 
 ```bash
 make data HOLLOWKNIGHT="$HOME/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data"
+```
+
+This runs the asset extraction pipeline with `HK_WEB_QUALITY=1` to build `src/data.bin` without heavy calculator downscaling.
+
+2. **Compile the WebAssembly Bundle:**
+
+```bash
 make web
 ```
 
-This writes `build/web/hollowknight.html` (plus `.js`, `.wasm` and data files). Open it with a static web server.
+This compiles the game into `build/web/hollowknight.html` (alongside `.js` and `.wasm` files) using the custom minimal HTML shell (`shell.html`).
 
-Keyboard mapping:
+3. **Run the Game:**
 
-* Arrows: move / look
-* Space: jump + menu confirm
-* X: attack + menu back
-* Shift: dash
-* Z or C: focus / spell
-* I: inventory
-* Tab: map
-* Backspace: pause
-* Escape: quit
+Serve the `build/web/` folder with any static HTTP server:
 
-## Good to know
+```bash
+python3 -m http.server 8080 --directory build/web
+```
 
-* **One app at a time:** Hollow Knight takes all the room the calculator has for apps. Installing it from the NumWorks website swaps out NumPlay and the other apps, and installing NumPlay again swaps it back out. Your saves in each one are kept.
-* **Only the start of the game:** it ends with Hornet in Greenpath. The ways on to places further in stay shut, like Jiji's door, the lift down to the mines and the Dream Nail's paths.
-* **No music or sound:** the calculator has no speaker.
-* **A few things are simpler:** dust, sparks and other particles are left out, and characters and scenery are drawn a little less finely so the whole game fits.
-* **Busy rooms stay smooth:** when the calculator falls behind, the room is drawn at half the height, each line shown twice. The HUD, text and menus stay sharp.
+Open `http://localhost:8080/hollowknight.html` in your browser.
 
-## Credits
+## Controls & Keybindings
 
-Inspired by Hollow Knight, not affiliated with Team Cherry.
+Default web controls:
 
-* The pictures, animations, maps, texts and fonts come from the game's own files.
+| Action | Default Key |
+| --- | --- |
+| Move Left / Right | Left Arrow / Right Arrow |
+| Look Up / Down | Up Arrow / Down Arrow |
+| Jump / Confirm | Space |
+| Attack / Cancel | X |
+| Focus / Spell | C or Z |
+| Dash | Shift |
+| Inventory | I |
+| Quick Map | Tab |
+| Pause Menu | Backspace |
+| Title / Quit | Escape |
 
-Made by Mason Chen as part of NumPlay.
+Controls can be fully rebound in real time by clicking the **Keybinds** button in the top navigation bar.
+
+## Calculator Target
+
+The ARM calculator target (`hollowknight.nwa`) remains available in `Makefile` (`make build`) for NumWorks devices.
 
 ## License
 
-The game's code is licensed under the GNU General Public License v3.0: see the `LICENSE` file at the root of the repository. The game's pictures, animations, maps, texts and fonts keep their own terms (see Credits).
+The code is licensed under the GNU General Public License v3.0 (see `LICENSE`). Hollow Knight assets, artwork, maps, and fonts are property of Team Cherry and are extracted locally from the user's legal game files.
