@@ -87,7 +87,7 @@ ENEMY_KINDS = [
       "Slash Quick", "Slash Effect", "Slash Effect Quick", "Slash 2", "Slash 2 Effect", "Slash End", "Evade", "Shoot",
       "Shoot End", "Wake", "Dormant 1", "Dormant 2", "Shake"]),
     # (Hornet: her code plays her clips by name, CLIP_HORNET_*; her needle's, her ball's, her effects', her corpse's)
-    ("hornet", "Control", ("sharedassets105.assets", 68), "HORNET", {"IDLE": "Idle", "DEATH_AIR": "Death Air"},
+    ("hornet", "Control", ("sharedassets105.assets", 69), "HORNET", {"IDLE": "Idle", "DEATH_AIR": "Death Air"},
      ["G Dash Antic", "G Dash", "G Dash Recover1", "G Dash Recover2", "Jump Antic", "Jump", "Land", "A Dash Antic",
       "A Dash", "Wall Impact", "Sphere Antic G", "Sphere Antic A", "Sphere Attack", "Sphere Recover G", "Sphere Recover A",
       "Sphere Ball", "Fall", "Throw Antic", "Throw", "Throw Recover", "Needle", "Needle Thread", "Run", "Hard Land",
@@ -139,15 +139,15 @@ ACTORS = {"knight": KNIGHT,
           "liquid": ("resources.assets", 20843, None),
           "geo": ("resources.assets", 23266, ["Small Idle", "Small Air", "Med Idle", "Med Air", "Large Idle", "Large Air"]),
           # the shops' menu: its borders and the shopkeepers' figureheads, unrolled up and down (on the HUD)
-          "shopui": ("sharedassets10.assets", 616, ["Shop_Menu_Top Up", "Shop_Menu_Top Down", "Shop_Menu_Bottom Up",
+          "shopui": ("sharedassets10.assets", 617, ["Shop_Menu_Top Up", "Shop_Menu_Top Down", "Shop_Menu_Bottom Up",
                                                     "Shop_Menu_Bottom Down", "Shop_Figurehead_Sly Up",
                                                     "Shop_Figurehead_Sly Down", "Shop_Figurehead_Mapperwife Up",
                                                     "Shop_Figurehead_Mapperwife Down", "Shop_Figurehead_Slug Up",
                                                     "Shop_Figurehead_Slug Down"]),
           # a mask shard's and a vessel fragment's UI (Heart Container UI, Vessel Fragment UI: in front of the room)
-          "heartui": ("sharedassets10.assets", 592, ["Fleur Appear", "Fleur Disappear", "Get 0", "Get 1", "Get 2", "Get 3",
+          "heartui": ("sharedassets10.assets", 593, ["Fleur Appear", "Fleur Disappear", "Get 0", "Get 1", "Get 2", "Get 3",
                                                      "Get 4", "Got 1", "Got 2", "Got 3", "Fuse", "Head Move"]),
-          "vesselui": ("sharedassets10.assets", 542, ["Get 0", "Get 1", "Get 2", "Get 3", "Got 1", "Got 2"]),
+          "vesselui": ("sharedassets10.assets", 543, ["Get 0", "Get 1", "Get 2", "Get 3", "Got 1", "Got 2"]),
           # the stag's menu: the map's selector, its borders unrolled up and down (on the HUD)
           "stagui": ("resources.assets", 23333, ["Stag_Map_Selection_Cursor", "Stag_Border_Top Up", "Stag_Border_Top Down",
                                                  "Stag_Border_Bottom Up", "Stag_Border_Bottom Down"]),

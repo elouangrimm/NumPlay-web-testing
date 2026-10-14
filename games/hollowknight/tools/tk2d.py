@@ -15,7 +15,7 @@ def _parse(f, pid):
     return sc.m_ClassName, v
 
 
-@functools.lru_cache(maxsize=None)
+@functools.lru_cache(maxsize=32)
 def index(path):
     """Collections and animations in a file: {'collections': {name: pid}, 'animations': [(pid, clip names)]}."""
     f = unity.asset_file(path)
@@ -40,19 +40,39 @@ def index(path):
     return {"collections": cols, "animations": anims}
 
 
-@functools.lru_cache(maxsize=None)
+@functools.lru_cache(maxsize=32)
 def collection(path, pid):
     _, v = _parse(unity.asset_file(path), pid)
     return v
 
 
-@functools.lru_cache(maxsize=None)
+@functools.lru_cache(maxsize=32)
 def animation(path, pid):
-    cls, v = _parse(unity.asset_file(path), pid)
+    f = unity.asset_file(path)
+    if f is None or pid not in f.objects:
+        return {"clips": []}
+    o = f.objects[pid]
+    if o.type.name == "GameObject":
+        d = unity.prefab(path, pid)
+        for obj in d.get("objects", []):
+            for c in obj.get("c", []):
+                cls = c.get("class")
+                if cls == "tk2dSpriteAnimation" and "clips" in c.get("v", {}):
+                    return c["v"]
+                if cls == "tk2dSpriteAnimator":
+                    v = c.get("v", {})
+                    ref = v.get("library") or v.get("anim") or v.get("animPptr") or v.get("animLib")
+                    if ref:
+                        return animation(*ref_file(path, ref))
+        return {"clips": []}
+
+    cls, v = _parse(f, pid)
     if cls == "tk2dSpriteAnimator" or "clips" not in v:
         ref = v.get("library") or v.get("anim") or v.get("animPptr") or v.get("animLib")
         if ref:
             return animation(*ref_file(path, ref))
+        if "clips" not in v:
+            v["clips"] = []
     return v
 
 

@@ -593,7 +593,7 @@ def main():
     sprites += digits
     print("actor frames", len(sprites), "clips", len(clips), "%.0fs" % (time.time() - t0), flush=True)
     jobs += [sp["job"] for sp in sprites]
-    with mp.get_context("spawn").Pool(min(4, os.cpu_count() or 1)) as pool:
+    with mp.get_context("spawn").Pool(1) as pool:
         texs = pool.map(art.encode_job, jobs, chunksize=4)
     # (the actors' textures come after the scenery's; a smooth one kept smaller: units a texel of what is kept)
     for sp, t in zip(sprites, texs[len(texs) - len(sprites):]):
