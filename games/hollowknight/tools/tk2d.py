@@ -48,13 +48,20 @@ def collection(path, pid):
 
 @functools.lru_cache(maxsize=None)
 def animation(path, pid):
-    _, v = _parse(unity.asset_file(path), pid)
+    cls, v = _parse(unity.asset_file(path), pid)
+    if cls == "tk2dSpriteAnimator" or "clips" not in v:
+        ref = v.get("library") or v.get("anim") or v.get("animPptr") or v.get("animLib")
+        if ref:
+            return animation(*ref_file(path, ref))
     return v
 
 
 def ref_file(path, ref):
     """A PPtr inside `path` -> (file, path id)."""
-    fid, pid = ref["m_FileID"], ref["m_PathID"]
+    if isinstance(ref, (list, tuple)):
+        fid, pid = ref[0], ref[1]
+    else:
+        fid, pid = ref["m_FileID"], ref["m_PathID"]
     if fid == 0:
         return path, pid
     f = unity.asset_file(path)
