@@ -36,7 +36,11 @@ typedef struct { uint32_t rb, gt; } Acc;
 static Acc acc[NPX] __attribute__((aligned(8)));
 /* a pixel cleared: no light yet but its dither (the screen's 4 x 4 pattern: a strip's rows are its rows), all
  * light left */
+#if defined(HOST) || defined(WEB_BUILD) || defined(__EMSCRIPTEN__)
+#define CL(d) {(0) * 0x800080u, 255u << 16 | (0) << 7}
+#else
 #define CL(d) {((d) >> 1) * 0x800080u, 255u << 16 | ((d) >> 2) << 7}
+#endif
 static const Acc acc_clear[STRIP_H][4] = {
     {CL(0), CL(8), CL(2), CL(10)}, {CL(12), CL(4), CL(14), CL(6)}, {CL(3), CL(11), CL(1), CL(9)}, {CL(15), CL(7), CL(13), CL(5)}};
 #undef CL

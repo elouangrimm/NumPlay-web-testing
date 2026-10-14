@@ -179,6 +179,7 @@
   <div id="navbar">
     <div id="title">Hollow Knight (WASM)</div>
     <div class="btn-group">
+      <button id="filter-btn" onclick="toggleFilter()">Filter: Crisp</button>
       <button id="controls-btn" onclick="openKeybinds()">Keybinds</button>
       <button id="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
     </div>
@@ -328,6 +329,20 @@
       renderKeygrid();
     }
 
+    let smoothFilter = false;
+    function toggleFilter() {
+      smoothFilter = !smoothFilter;
+      const canvas = document.getElementById("canvas");
+      const btn = document.getElementById("filter-btn");
+      if (smoothFilter) {
+        canvas.style.imageRendering = "auto";
+        btn.textContent = "Filter: Smooth";
+      } else {
+        canvas.style.imageRendering = "pixelated";
+        btn.textContent = "Filter: Crisp";
+      }
+    }
+
     function toggleFullscreen() {
       const canvas = document.getElementById("canvas");
       if (canvas.requestFullscreen) {
@@ -336,6 +351,15 @@
         canvas.webkitRequestFullscreen();
       }
     }
+
+    // Resume Web Audio Context on first user interaction to comply with autoplay policy
+    function initAudioOnInteraction() {
+      if (window.Module && Module.hkAudioCtx && Module.hkAudioCtx.state === "suspended") {
+        Module.hkAudioCtx.resume();
+      }
+    }
+    window.addEventListener("click", initAudioOnInteraction, { once: true });
+    window.addEventListener("keydown", initAudioOnInteraction, { once: true });
 
     var Module = {
       preRun: [],

@@ -20,6 +20,7 @@ void plat_fill(int x, int y, int w, int h, uint16_t c) {
     for (int k = 0; k < w; k++)
       if ((unsigned)(x + k) < SCREEN_W && (unsigned)(y + r) < SCREEN_H) host_fb[(y + r) * SCREEN_W + x + k] = c;
 }
+void plat_sound(const char *evt) { (void)evt; }
 static char save_dir[256] = "build/host-saves";
 void host_save_dir(const char *d) { snprintf(save_dir, sizeof save_dir, "%s", d); }
 bool plat_save(const char *name, const void *data, uint32_t len) {

@@ -150,9 +150,10 @@ bool menu_tick(uint32_t keys) {
   switch (mn.screen) {
     case MS_TITLE:
       /* Start Game, How to Play, Quit Game */
-      if (p & K_UP) mn.sel = (uint8_t)((mn.sel + 2) % 3);
-      if (p & K_DOWN) mn.sel = (uint8_t)((mn.sel + 1) % 3);
+      if (p & K_UP) { mn.sel = (uint8_t)((mn.sel + 2) % 3); plat_sound("menu_move"); }
+      if (p & K_DOWN) { mn.sel = (uint8_t)((mn.sel + 1) % 3); plat_sound("menu_move"); }
       if (p & K_OK) {
+        plat_sound("menu_select");
         if (mn.sel == 0) go(MS_PROFILES, 0);
         else if (mn.sel == 1) help_open(MS_TITLE, 0);
         else mn.quit = true;
@@ -161,21 +162,23 @@ bool menu_tick(uint32_t keys) {
     case MS_PROFILES:
       if (mn.part >= PS_PROMPT_NO) {
         /* Clear Save?: No, Yes */
-        if (p & (K_LEFT | K_RIGHT)) mn.part = mn.part == PS_PROMPT_NO ? PS_PROMPT_YES : PS_PROMPT_NO;
-        if (p & K_BACK) mn.part = PS_CLEAR;
+        if (p & (K_LEFT | K_RIGHT)) { mn.part = mn.part == PS_PROMPT_NO ? PS_PROMPT_YES : PS_PROMPT_NO; plat_sound("menu_move"); }
+        if (p & K_BACK) { mn.part = PS_CLEAR; plat_sound("menu_move"); }
         else if (p & K_OK) {
+          plat_sound("menu_select");
           if (mn.part == PS_PROMPT_YES) save_clear(mn.sel), read_slots(), mn.part = PS_SLOT;
           else mn.part = PS_CLEAR;
         }
         return true;
       }
-      if (p & K_UP) mn.sel = (uint8_t)(mn.sel ? mn.sel - 1 : SAVE_SLOTS), mn.part = PS_SLOT;
-      if (p & K_DOWN) mn.sel = (uint8_t)(mn.sel < SAVE_SLOTS ? mn.sel + 1 : 0), mn.part = PS_SLOT;
+      if (p & K_UP) { mn.sel = (uint8_t)(mn.sel ? mn.sel - 1 : SAVE_SLOTS); mn.part = PS_SLOT; plat_sound("menu_move"); }
+      if (p & K_DOWN) { mn.sel = (uint8_t)(mn.sel < SAVE_SLOTS ? mn.sel + 1 : 0); mn.part = PS_SLOT; plat_sound("menu_move"); }
       /* (a slot with a game, or a corrupted one: its Clear Save, to the right) */
-      if ((p & K_RIGHT) && mn.sel < SAVE_SLOTS && mn.state[mn.sel]) mn.part = PS_CLEAR;
-      if (p & K_LEFT) mn.part = PS_SLOT;
-      if (p & K_BACK) go(MS_TITLE, 0);
+      if ((p & K_RIGHT) && mn.sel < SAVE_SLOTS && mn.state[mn.sel]) { mn.part = PS_CLEAR; plat_sound("menu_move"); }
+      if (p & K_LEFT) { mn.part = PS_SLOT; plat_sound("menu_move"); }
+      if (p & K_BACK) { go(MS_TITLE, 0); plat_sound("menu_move"); }
       else if (p & K_OK) {
+        plat_sound("menu_select");
         if (mn.sel == SAVE_SLOTS) go(MS_TITLE, 0);
         else if (mn.part == PS_CLEAR) mn.part = PS_PROMPT_NO;
         else pick_slot(mn.sel);
@@ -204,10 +207,11 @@ bool menu_tick(uint32_t keys) {
       return true;
     case MS_PAUSE:
       /* Continue, How to Play, Quit to Menu */
-      if (p & K_UP) mn.sel = (uint8_t)((mn.sel + 2) % 3);
-      if (p & K_DOWN) mn.sel = (uint8_t)((mn.sel + 1) % 3);
-      if (p & (K_PAUSE | K_BACK)) go(MS_GAME, 0);
+      if (p & K_UP) { mn.sel = (uint8_t)((mn.sel + 2) % 3); plat_sound("menu_move"); }
+      if (p & K_DOWN) { mn.sel = (uint8_t)((mn.sel + 1) % 3); plat_sound("menu_move"); }
+      if (p & (K_PAUSE | K_BACK)) { go(MS_GAME, 0); plat_sound("menu_move"); }
       else if (p & K_OK) {
+        plat_sound("menu_select");
         if (mn.sel == 0) go(MS_GAME, 0);
         else if (mn.sel == 1) help_open(MS_PAUSE, 0);
         else {

@@ -233,6 +233,7 @@ static void hero_jump(void) {
   h->cs.jumping = true;
   h->jump_queue_steps = 0;
   h->jumped_steps = 0;
+  plat_sound("jump");
 }
 
 static void hero_dash(void) {
@@ -248,6 +249,7 @@ static void hero_dash(void) {
   h->dash_queue_steps = 0;
   h->dash_cooldown_timer = DASH_COOLDOWN;
   fx_dash_burst(h->body.x, h->body.y, h->cs.facing_right, h->cs.on_ground);
+  plat_sound("dash");
 }
 
 static void attack(int dir) {
@@ -283,6 +285,7 @@ static void do_attack(void) {
   h->thunk_dir = (int8_t)dir;
   h->thunk_timer = NAIL_TERRAIN_CHECK_TIME;
   h->thunk_hit = false;
+  plat_sound("slash");
 }
 
 /* NailParry: a moment unhurt by what is no hazard */
@@ -321,6 +324,7 @@ void hero_bounce(void) {
     h->bounce_timer = 0;
     h->cs.bouncing = true;
     h->air_dashed = false;
+    plat_sound("hit");
   }
 }
 
@@ -1309,6 +1313,7 @@ void hero_take_damage(int side, int damage, int hazard) {
     map_cancel();
     vm_broadcast(VMEV_HERO_DAMAGED);
     inv_damage();
+    plat_sound("damage");
     if (h->damage_mode == DAMAGE_HAZARD_ONLY && hazard == HAZ_NORMAL) return;
     cancel_attack();
     if (h->cs.recoiling_left || h->cs.recoiling_right) cancel_recoil_horizontal();
@@ -1328,6 +1333,7 @@ void hero_take_damage(int side, int damage, int hazard) {
     take_damage_charm_effects(damage);
     vm_broadcast(VMEV_HERO_DAMAGED);   /* (HeroCtrl-HeroDamaged) */
     fury_check();
+    plat_sound("damage");
     if (g_pd.health == 0) hero_die();
     else die_from_hazard();
   }
@@ -1481,7 +1487,7 @@ void hero_cancel_hero_jump(void) {
   if (g_hero.body.vy > 0) g_hero.body.vy = 0;
 }
 
-void hero_add_geo(int amount) { g_pd.geo += amount; }
+void hero_add_geo(int amount) { g_pd.geo += amount; plat_sound("geo"); }
 
 void hero_add_health(int amount) {
   g_pd.health = (int8_t)(g_pd.health + amount >= g_pd.max_health ? g_pd.max_health : g_pd.health + amount);
