@@ -72,11 +72,8 @@ static void frame(void) {
   menu_draw();
   gfx_frame();
   web_present();
-  if (menu_in_game()) {
-    avg8 = avg8 - avg8 / 8 + (plat_millis() - now);
-    if (!g_gfx_fast && avg8 > SLOW_MS * 8) g_gfx_fast = true;
-    else if (g_gfx_fast && avg8 < QUICK_MS * 8) g_gfx_fast = false;
-  }
+  // On web/PC, disable half-height rendering skips for maximum graphic fidelity
+  g_gfx_fast = false;
 }
 
 int main(void) {

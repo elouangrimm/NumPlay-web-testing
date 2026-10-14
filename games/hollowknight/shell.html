@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hollow Knight Web Target</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #050508;
+      color: #d1d5db;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #navbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    #title {
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      font-size: 0.95rem;
+      color: #e5e7eb;
+      text-transform: uppercase;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e5e7eb;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-weight: 500;
+    }
+    button:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+    #game-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100vw;
+      height: calc(100vh - 48px);
+      margin-top: 48px;
+    }
+    canvas {
+      background-color: #000;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      max-width: 100%;
+      max-height: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+    #status-overlay {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 5;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #d1d5db;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    #status-text {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      letter-spacing: 0.05em;
+    }
+
+    /* Keybind Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-card {
+      background: #111116;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      width: 420px;
+      max-width: 90vw;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f3f4f6;
+    }
+    .keygrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+      margin-bottom: 24px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .key-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .key-label {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    .key-btn {
+      min-width: 80px;
+      padding: 4px 8px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    .key-btn.listening {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: #3b82f6;
+      color: #60a5fa;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="navbar">
+    <div id="title">Hollow Knight (WASM)</div>
+    <div class="btn-group">
+      <button id="controls-btn" onclick="openKeybinds()">Keybinds</button>
+      <button id="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
+    </div>
+  </div>
+
+  <div id="game-container">
+    <div id="status-overlay">
+      <div class="spinner" id="spinner"></div>
+      <div id="status-text">Loading WebAssembly...</div>
+    </div>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+  </div>
+
+  <div class="modal" id="keybind-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Configure Keybindings</div>
+        <button onclick="closeKeybinds()">✕</button>
+      </div>
+      <div class="keygrid" id="keygrid"></div>
+      <div style="display: flex; justify-content: space-between;">
+        <button onclick="resetKeybinds()">Reset Defaults</button>
+        <button onclick="closeKeybinds()">Save & Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_KEYBIND_MAP = {
+      "ArrowLeft": 1,        // K_LEFT
+      "ArrowRight": 2,       // K_RIGHT
+      "ArrowUp": 4,          // K_UP
+      "ArrowDown": 8,        // K_DOWN
+      "Space": 16 | 512,     // K_JUMP | K_OK
+      "Enter": 512,          // K_OK
+      "KeyX": 32 | 1024,     // K_ATTACK | K_BACK
+      "ShiftLeft": 256,      // K_DASH
+      "ShiftRight": 256,     // K_DASH
+      "KeyC": 64 | 128,      // K_FOCUS | K_SPELL
+      "KeyZ": 64 | 128,      // K_FOCUS | K_SPELL
+      "KeyI": 8192,          // K_INV
+      "Tab": 4096,           // K_MAP
+      "Backspace": 2048,     // K_PAUSE
+      "Escape": 16384        // K_HOME
+    };
+
+    const ACTION_NAMES = [
+      { name: "Move Left", codeKey: "ArrowLeft" },
+      { name: "Move Right", codeKey: "ArrowRight" },
+      { name: "Look Up", codeKey: "ArrowUp" },
+      { name: "Look Down", codeKey: "ArrowDown" },
+      { name: "Jump / OK", codeKey: "Space" },
+      { name: "Attack / Back", codeKey: "KeyX" },
+      { name: "Focus / Spell", codeKey: "KeyC" },
+      { name: "Dash", codeKey: "ShiftLeft" },
+      { name: "Inventory", codeKey: "KeyI" },
+      { name: "Quick Map", codeKey: "Tab" },
+      { name: "Pause", codeKey: "Backspace" },
+      { name: "Title / Quit", codeKey: "Escape" }
+    ];
+
+    let currentKeyMap = loadKeyMap();
+    let listeningAction = null;
+
+    function loadKeyMap() {
+      try {
+        const saved = localStorage.getItem("hk_keybinds");
+        if (saved) return JSON.parse(saved);
+      } catch (e) {}
+      return { ...DEFAULT_KEYBIND_MAP };
+    }
+
+    function saveKeyMap() {
+      try {
+        localStorage.setItem("hk_keybinds", JSON.stringify(currentKeyMap));
+      } catch (e) {}
+      if (window.Module && Module.updateKeyMap) {
+        Module.updateKeyMap(currentKeyMap);
+      }
+    }
+
+    function renderKeygrid() {
+      const grid = document.getElementById("keygrid");
+      grid.innerHTML = "";
+      ACTION_NAMES.forEach(act => {
+        const row = document.createElement("div");
+        row.className = "key-row";
+
+        const label = document.createElement("span");
+        label.className = "key-label";
+        label.textContent = act.name;
+
+        // Find which e.code is currently mapped to this action
+        let boundCode = Object.keys(currentKeyMap).find(code => currentKeyMap[code] === DEFAULT_KEYBIND_MAP[act.codeKey]) || act.codeKey;
+
+        const btn = document.createElement("button");
+        btn.className = "key-btn";
+        btn.textContent = boundCode;
+        btn.onclick = () => startListening(act, btn);
+
+        row.appendChild(label);
+        row.appendChild(btn);
+        grid.appendChild(row);
+      });
+    }
+
+    function startListening(action, btn) {
+      if (listeningAction) renderKeygrid();
+      listeningAction = action;
+      btn.classList.add("listening");
+      btn.textContent = "Press key...";
+
+      const handler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.removeEventListener("keydown", handler, true);
+
+        const newCode = e.code;
+        const mask = DEFAULT_KEYBIND_MAP[action.codeKey];
+
+        // Remove old binding for this action
+        Object.keys(currentKeyMap).forEach(k => {
+          if (currentKeyMap[k] === mask) delete currentKeyMap[k];
+        });
+
+        currentKeyMap[newCode] = mask;
+        saveKeyMap();
+        listeningAction = null;
+        renderKeygrid();
+      };
+
+      window.addEventListener("keydown", handler, true);
+    }
+
+    function openKeybinds() {
+      renderKeygrid();
+      document.getElementById("keybind-modal").classList.add("active");
+    }
+
+    function closeKeybinds() {
+      document.getElementById("keybind-modal").classList.remove("active");
+    }
+
+    function resetKeybinds() {
+      currentKeyMap = { ...DEFAULT_KEYBIND_MAP };
+      saveKeyMap();
+      renderKeygrid();
+    }
+
+    function toggleFullscreen() {
+      const canvas = document.getElementById("canvas");
+      if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+      } else if (canvas.webkitRequestFullscreen) {
+        canvas.webkitRequestFullscreen();
+      }
+    }
+
+    var Module = {
+      preRun: [],
+      postRun: [function() {
+        if (Module.updateKeyMap) {
+          Module.updateKeyMap(currentKeyMap);
+        }
+      }],
+      print: function(text) {
+        console.log(text);
+      },
+      printErr: function(text) {
+        console.error(text);
+      },
+      canvas: (function() {
+        var canvas = document.getElementById("canvas");
+        return canvas;
+      })(),
+      setStatus: function(text) {
+        var statusOverlay = document.getElementById("status-overlay");
+        var statusText = document.getElementById("status-text");
+        var spinner = document.getElementById("spinner");
+
+        if (!text) {
+          statusOverlay.style.display = "none";
+        } else {
+          statusOverlay.style.display = "flex";
+          statusText.textContent = text;
+          if (text === "Running...") spinner.style.display = "none";
+        }
+      },
+      totalDependencies: 0,
+      monitorRunDependencies: function(left) {
+        this.totalDependencies = Math.max(this.totalDependencies, left);
+        Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+      }
+    };
+
+    Module.setStatus('Downloading...');
+
+    window.onerror = function(event) {
+      Module.setStatus('Exception thrown, see JavaScript console');
+    };
+  </script>
+  {{{ SCRIPT }}}
+</body>
+</html>
