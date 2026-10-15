@@ -242,7 +242,9 @@ DRAWN_SCALE = {"Arrow Up": 1.3, "Arrow Down": 1.3, "Stop Up": 1.3, "Stop Down": 
 K0 = scene.FOCAL / (0.004 - scene.CAMZ)   # screen pixels a unit, where actors are (z near 0)
 HUD_K = (scene.VIEW_H / 2) / 8.7107        # the HUD's (its orthographic camera)
 # (actor, clip): drawn bigger or smaller than their sprites
-ACTOR_RES = float(os.environ.get("HK_ACTOR_RES", "0.7"))   # (to fit the flash)
+HK_WEB_QUALITY = os.environ.get("HK_WEB_QUALITY", "0") == "1"
+DEFAULT_ACTOR_RES = "1.0" if HK_WEB_QUALITY else "0.7"
+ACTOR_RES = float(os.environ.get("HK_ACTOR_RES", DEFAULT_ACTOR_RES))   # (to fit the flash)
 ACTOR_SCALE = {"hud": HUD_K / K0, "shopui": HUD_K / K0, "stagui": HUD_K / K0, "mapui": HUD_K / K0, "journalmsg": 0.7 * HUD_K / K0, "liquid": 1.4 * HUD_K / K0, "dialogue": text.TEXT_K * HUD_K / K0}
 HUD_MASK = 0.7135
 

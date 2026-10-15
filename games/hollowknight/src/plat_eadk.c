@@ -34,6 +34,7 @@ void plat_push(int x, int y, int w, int h, const uint16_t *px) {
 void plat_fill(int x, int y, int w, int h, uint16_t c) {
   if (w > 0 && h > 0) eadk_display_push_rect_uniform((eadk_rect_t){(uint16_t)x, (uint16_t)y, (uint16_t)w, (uint16_t)h}, c);
 }
+void plat_sound(const char *evt) { (void)evt; }
 bool plat_save(const char *name, const void *data, uint32_t len) { return ef_write(name, data, len); }
 const uint8_t *plat_load(const char *name, uint32_t *len) { return ef_read(name, len); }
 bool plat_remove(const char *name) { return ef_remove(name); }

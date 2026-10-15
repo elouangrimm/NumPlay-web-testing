@@ -19,7 +19,7 @@ HK_WEB_QUALITY = os.environ.get("HK_WEB_QUALITY", "0") == "1"
 if HK_WEB_QUALITY:
     FIT_K = float(os.environ.get("HK_FIT_K", "1.0"))
     FG_SCALE = float(os.environ.get("HK_FG_SCALE", "1.0"))
-    BLUR_SCALE = float(os.environ.get("HK_BLUR_SCALE", "0.5"))
+    BLUR_SCALE = float(os.environ.get("HK_BLUR_SCALE", "1.0"))
 else:
     FIT_K = float(os.environ.get("HK_FIT_K", "0.77"))   # (all the rooms' scenery a little less fine, to fit the flash)
 BLUR_PRE = False   # (the game blurs the background as a whole: the calculator does too)
